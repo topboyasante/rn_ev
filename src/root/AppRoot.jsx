@@ -7,13 +7,15 @@ import {
 } from "@expo-google-fonts/inter";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback } from "react";
-import { SafeAreaView } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View } from "react-native";
 import AppStackNavigator from "../navigation/stack-navigators/AppStackNavigator";
 import LoginScreen from "../screens/auth/login";
+import { UserLocationContext } from "../context/UserLocationContext";
 
 // Makes the native splash screen (configured in app.json) remain visible until hideAsync is called.
 SplashScreen.preventAutoHideAsync();
@@ -36,6 +38,22 @@ const tokenCache = {
 };
 
 export default function AppRoot() {
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location.coords);
+    })();
+  }, []);
+
   const [fontsLoaded, fontError] = useFonts({
     "inter-reg": Inter_400Regular,
     "inter-semibold": Inter_600SemiBold,
@@ -60,25 +78,27 @@ export default function AppRoot() {
   }
 
   return (
-    <NavigationContainer>
-      <ClerkProvider
-        publishableKey={`${CLERK_PUBLISHABLE_KEY}`}
-        tokenCache={tokenCache}
-      >
-        <SafeAreaView onLayout={onLayoutRootView} className="flex-1">
-          <StatusBar style="auto" />
+    <UserLocationContext.Provider value={{ location, setLocation }}>
+      <NavigationContainer>
+        <ClerkProvider
+          publishableKey={`${CLERK_PUBLISHABLE_KEY}`}
+          tokenCache={tokenCache}
+        >
+          <View onLayout={onLayoutRootView} className="flex-1">
+            <StatusBar style="auto" />
 
-          {/* <SignedIn/> Contains all pages that show when we are signed in */}
-          <SignedIn>
-            <AppStackNavigator/>
-          </SignedIn>
+            {/* <SignedIn/> Contains all pages that show when we are signed in */}
+            <SignedIn>
+              <AppStackNavigator />
+            </SignedIn>
 
-          {/* <SignedOut/> Contains all pages that show when we are signed out */}
-          <SignedOut>
-            <LoginScreen />
-          </SignedOut>
-        </SafeAreaView>
-      </ClerkProvider>
-    </NavigationContainer>
+            {/* <SignedOut/> Contains all pages that show when we are signed out */}
+            <SignedOut>
+              <LoginScreen />
+            </SignedOut>
+          </View>
+        </ClerkProvider>
+      </NavigationContainer>
+    </UserLocationContext.Provider>
   );
 }
