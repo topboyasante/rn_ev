@@ -16,6 +16,7 @@ import { View } from "react-native";
 import AppStackNavigator from "../navigation/stack-navigators/AppStackNavigator";
 import LoginScreen from "../screens/auth/login";
 import { UserLocationContext } from "../context/UserLocationContext";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // Makes the native splash screen (configured in app.json) remain visible until hideAsync is called.
 SplashScreen.preventAutoHideAsync();
@@ -78,27 +79,29 @@ export default function AppRoot() {
   }
 
   return (
-    <UserLocationContext.Provider value={{ location, setLocation }}>
-      <NavigationContainer>
-        <ClerkProvider
-          publishableKey={`${CLERK_PUBLISHABLE_KEY}`}
-          tokenCache={tokenCache}
-        >
-          <View onLayout={onLayoutRootView} className="flex-1">
-            <StatusBar style="auto" />
+    <GestureHandlerRootView className="flex-1">
+      <UserLocationContext.Provider value={{ location, setLocation }}>
+        <NavigationContainer>
+          <ClerkProvider
+            publishableKey={`${CLERK_PUBLISHABLE_KEY}`}
+            tokenCache={tokenCache}
+          >
+            <View onLayout={onLayoutRootView} className="flex-1">
+              <StatusBar style="auto" />
 
-            {/* <SignedIn/> Contains all pages that show when we are signed in */}
-            <SignedIn>
-              <AppStackNavigator />
-            </SignedIn>
+              {/* <SignedIn/> Contains all pages that show when we are signed in */}
+              <SignedIn>
+                <AppStackNavigator />
+              </SignedIn>
 
-            {/* <SignedOut/> Contains all pages that show when we are signed out */}
-            <SignedOut>
-              <LoginScreen />
-            </SignedOut>
-          </View>
-        </ClerkProvider>
-      </NavigationContainer>
-    </UserLocationContext.Provider>
+              {/* <SignedOut/> Contains all pages that show when we are signed out */}
+              <SignedOut>
+                <LoginScreen />
+              </SignedOut>
+            </View>
+          </ClerkProvider>
+        </NavigationContainer>
+      </UserLocationContext.Provider>
+    </GestureHandlerRootView>
   );
 }

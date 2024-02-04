@@ -3,8 +3,7 @@ import React from "react";
 import { View } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
-
-export default function Searchbar({searchedLocation}) {
+export default function Searchbar({ searchedLocation }) {
   return (
     <View className="px-5">
       <GooglePlacesAutocomplete
@@ -12,14 +11,12 @@ export default function Searchbar({searchedLocation}) {
         fetchDetails={true}
         enablePoweredByContainer={false}
         onPress={(data, details = null) => {
-          searchedLocation(details?.geometry?.location)
+          searchedLocation(details?.geometry?.location);
         }}
-        query={
-          {
-            key:`${GOOGLE_PLACES_API}`,
-            language:"en"
-          }
-        }
+        query={{
+          key: `${GOOGLE_PLACES_API}`,
+          language: "en",
+        }}
       />
     </View>
   );
